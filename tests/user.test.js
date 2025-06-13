@@ -19,6 +19,10 @@ describe('User model', () => {
     await mongoose.connection.close();
   });
 
+  test('Broken test', () => {
+    expect(false).toBe(true);
+  });
+
   test('comparePassword should match hash correctly', async () => {
     const plain = 'Password123';
     const hashed = await bcrypt.hash(plain, 10);
