@@ -81,21 +81,18 @@ UserSchema.method('comparePassword', function (candidatePassword, cb) {
 UserSchema.method('incLoginAttempts', function (cb) {
   // if we have a previous lock that has expired, restart at 1
   if (this.lockUntil && this.lockUntil < Date.now()) {
-    return this.update(
-      {
-        $set: { loginAttempts: 1 },
-        $unset: { lockUntil: 1 },
-      },
-      cb
-    );
+    this.loginAttempts = 1;
+    this.lockUntil = undefined;
+    return this.save(cb);
   }
   // otherwise we're incrementing
-  var updates = { $inc: { loginAttempts: 1 } };
-  // lock the account if we've reached max attempts and it's not locked already
-  if (this.loginAttempts + 1 >= MAX_LOGIN_ATTEMPTS && !this.isLocked) {
-    updates.$set = { lockUntil: Date.now() + LOCK_TIME };
+  this.loginAttempts += 1;
+
+  if (this.loginAttempts >= MAX_LOGIN_ATTEMPTS && !this.isLocked) {
+    this.lockUntil = Date.now() + LOCK_TIME;
   }
-  return this.update(updates, cb);
+
+  return this.save(cb);
 });
 
 /**
