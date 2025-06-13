@@ -31,15 +31,7 @@ const loggedOutOnly = (req, res, next) => {
 // Route Handlers
 function authenticate(passport) {
   // Main/Home Page
-
-  router.get('/', loggedInOnly, async (req, res, next) => {
-    try {
-      const posts = await Post.find({});
-      res.render('index', { posts });
-    } catch (err) {
-      next(err);
-    }
-  });
+  router.get('/', loggedInOnly, postController.index);
 
   // Login View
   router.get('/login', loggedOutOnly, (req, res) => {
