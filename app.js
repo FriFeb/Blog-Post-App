@@ -106,19 +106,19 @@ const local = new LocalStrategy((username, password, done) => {
     // otherwise we can determine why we failed
     var reasons = User.failedLogin;
     switch (reason) {
-      case reasons.NOT_FOUND:
-      case reasons.PASSWORD_INCORRECT:
-        // note: these cases are usually treated the same - don't tell
-        // the user *why* the login failed, only that it did
-        done(null, false, { message: 'Invalid username/password, Try again!' });
-        break;
-      case reasons.MAX_ATTEMPTS:
-        // send email or otherwise notify user that account is
-        // temporarily locked
-        done(null, false, {
-          message: 'Your account is locked out, Try later!',
-        });
-        break;
+    case reasons.NOT_FOUND:
+    case reasons.PASSWORD_INCORRECT:
+      // note: these cases are usually treated the same - don't tell
+      // the user *why* the login failed, only that it did
+      done(null, false, { message: 'Invalid username/password, Try again!' });
+      break;
+    case reasons.MAX_ATTEMPTS:
+      // send email or otherwise notify user that account is
+      // temporarily locked
+      done(null, false, {
+        message: 'Your account is locked out, Try later!',
+      });
+      break;
     }
   });
 

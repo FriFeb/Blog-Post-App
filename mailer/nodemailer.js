@@ -5,11 +5,11 @@ const keys = require(path.join(__dirname, '../config/keys'));
 
 const sendMail = (mailOptions, callback) => {
     
-    var transporter = nodemailer.createTransport(keys.smtpConfig);
+  var transporter = nodemailer.createTransport(keys.smtpConfig);
 
-    transporter.sendMail(mailOptions, function(err, info) {
-        return callback(err, info);
-    });
+  transporter.sendMail(mailOptions, function(err, info) {
+    return callback(err, info);
+  });
 };
 
-module.exports = {sendMail}
+module.exports = {sendMail};

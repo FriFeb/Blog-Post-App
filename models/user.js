@@ -2,8 +2,8 @@
  Module dependencies
 */
 const mongoose = require('mongoose'),
-  bcrypt = require('bcrypt');
-uniqueValidator = require('mongoose-unique-validator');
+  bcrypt = require('bcrypt'),
+  uniqueValidator = require('mongoose-unique-validator');
 
 //==============================================================================
 // Module Variables
@@ -158,11 +158,11 @@ UserSchema.virtual('password').set(function (value) {
 });
 
 UserSchema.virtual('hasGenderMale').get(function () {
-  return this.profile.gender == 'M';
+  return this.profile.gender === 'M';
 });
 
 UserSchema.virtual('hasGenderFemale').get(function () {
-  return this.profile.gender == 'F';
+  return this.profile.gender === 'F';
 });
 
 UserSchema.virtual('isLocked').get(function () {

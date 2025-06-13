@@ -11,6 +11,8 @@ const Comment = require(path.join(__dirname, '../models/comment'));
 const keys = require(path.join(__dirname, '../config/keys'));
 const mailer = require(path.join(__dirname, '../mailer/nodemailer'));
 
+const postController = require('../controllers/postController');
+
 // Authentication Middleware
 const loggedInOnly = (req, res, next) => {
   if (req.isAuthenticated()) {
@@ -49,7 +51,7 @@ function authenticate(passport) {
   );
 
   // Logout Handler
-  router.get('/logout', function (req, res) {
+  router.get('/logout', function (req, res, next) {
     req.logout(function (err) {
       if (err) {
         return next(err);
@@ -65,7 +67,7 @@ function authenticate(passport) {
   });
 
   // Forgot Password handler
-  router.post('/forgot', function (req, res, next) {
+  router.post('/forgot', function (req, res) {
     async.waterfall(
       [
         function (done) {
@@ -101,7 +103,7 @@ function authenticate(passport) {
             .replace('<token>', token);
           let disableEmailSending = keys.disableEmailSending;
 
-          if (disableEmailSending && disableEmailSending == 'no') {
+          if (disableEmailSending && disableEmailSending === 'no') {
             mailOptions['text'] = replaceHostAndToken;
             mailer.sendMail(mailOptions, function (err, info) {
               if (info)
@@ -114,7 +116,7 @@ function authenticate(passport) {
               done(err, info);
             });
           } else {
-            done(`Email sending is disabled`, null);
+            done('Email sending is disabled', null);
           }
         },
       ],
@@ -148,7 +150,7 @@ function authenticate(passport) {
   });
 
   // Reset password Handler
-  router.post('/reset', function (req, res) {
+  router.post('/reset', function (req, res, next) {
     async.waterfall(
       [
         function (done) {
@@ -182,10 +184,13 @@ function authenticate(passport) {
             'to',
             user.email
           );
-          replaceEmail = mailOptions['text'].replace('<email>', user.email);
+          const replaceEmail = mailOptions['text'].replace(
+            '<email>',
+            user.email
+          );
           let disableMailSending = keys.disableMailSending;
 
-          if (disableMailSending && disableMailSending == 'no') {
+          if (disableMailSending && disableMailSending === 'no') {
             mailOptions['text'] = replaceEmail;
             mailer.sendMail(mailOptions, function (err, info) {
               req.flash('success', 'Success! Your password has been changed.');
@@ -198,7 +203,7 @@ function authenticate(passport) {
           }
         },
       ],
-      function (err, info) {
+      function (err) {
         if (err) return next(err);
         res.redirect('/login');
       }
@@ -222,8 +227,8 @@ function authenticate(passport) {
 
         let disableMailSending = keys.disableMailSending;
 
-        if (disableMailSending && disableMailSending == 'no') {
-          mailer.sendMail(regMailOptions, function (err, info) {
+        if (disableMailSending && disableMailSending === 'no') {
+          mailer.sendMail(regMailOptions, function (err) {
             if (err) console.log(err);
           });
         } else {
@@ -251,7 +256,7 @@ function authenticate(passport) {
   });
 
   // Profile View
-  router.get('/profile', loggedInOnly, function (req, res, next) {
+  router.get('/profile', loggedInOnly, function (req, res) {
     res.render('profile');
   });
 
@@ -271,15 +276,15 @@ function authenticate(passport) {
     User.findOne({ username: req.body.username })
       .exec()
       .then((user) => {
-        if (user == null) {
+        if (user === null) {
           req.flash('error', 'Sorry, can not change the username.');
           res.redirect('/profile');
-        } else if (user && req.user.username != user.username) {
+        } else if (user && req.user.username !== user.username) {
           req.flash('error', 'Sorry, that username is already taken.');
           res.redirect('/profile');
         } else {
           (user.username = newProfile.username),
-            (user.profile = newProfile.profile);
+          (user.profile = newProfile.profile);
           user.save().then((user) => {
             req.login(user, (err) => {
               if (err) {
@@ -297,7 +302,7 @@ function authenticate(passport) {
         if (err) {
           req.flash(
             'error',
-            "Soomething wrong happened while updating the user's profile!"
+            'Soomething wrong happened while updating the user\'s profile!'
           );
           res.redirect('/');
         } else {
@@ -314,7 +319,7 @@ function authenticate(passport) {
   // Add Post Handler
   router.post('/post', (req, res, next) => {
     Post.create(req.body)
-      .then((post) => {
+      .then(() => {
         req.flash('success', 'Blog Post posted successfully!');
         res.redirect('/');
       })
@@ -342,7 +347,7 @@ function authenticate(passport) {
     });
   });
 
-  router.get('/post/:id/comments', loggedInOnly, function (req, res) {
+  router.get('/post/:id/comments', loggedInOnly, function (req, res, next) {
     Post.findById(req.params.id)
       .populate('comments')
       .exec()
@@ -366,13 +371,14 @@ function authenticate(passport) {
     Post.findById(req.body.postId)
       .exec()
       .then((post) => {
-        comment = Comment.create({
+        // const comment
+        Comment.create({
           name: req.body.name,
           email: req.body.email,
           message: req.body.message,
         }).then((comment) => {
           post.comments.push(comment);
-          post.save().then((post) => {
+          post.save().then(() => {
             req.flash('success', 'Comment added to the Post successfully!');
             res.redirect('/');
           });
