@@ -41,7 +41,11 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
-      - name: Run Jest Tests
+      - name: Run Puppeteer Jest Tests
+        env:
+          CI: true
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: false
         run: |
           npm install jest --save-dev
-          npm test -- --coverage
+          npm install puppeteer --save-dev
+          npx jest --coverage
