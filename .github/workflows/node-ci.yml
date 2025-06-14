@@ -41,6 +41,17 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
+      - name: Install wait-on
+        run: npm install -g wait-on
+
+      - name: Start the server in background
+        run: npm start
+        env:
+          NODE_ENV: test
+
+      - name: Wait for server to be ready
+        run: wait-on http://localhost:8080
+
       - name: Run Puppeteer Jest Tests
         env:
           CI: true
